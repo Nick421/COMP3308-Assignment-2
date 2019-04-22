@@ -2,23 +2,29 @@ import math
 
 def knn(k, training_data, testing_data):
 
-    euclieden_dist = []
+    num_attributes = len(training_data[0])-1
+    euclidean_dist = []
     results = []
-    for test in testing_data:
-        for i in training_data:
-            distance = euclidean_distance(training_data,testing_data)
-            euclieden_dist.append((distance,training_data[:,-1]))
 
-        euclieden_dist.sort(key=lambda i:i[0])
+    for i in range(len(testing_data)):
+        for x in range(len(training_data)):
+            temp_attributes = []
+            for y in range(0,num_attributes+1):
+                temp_attributes.append(training_data[x][y])
+
+            distance = euclidean_distance(temp_attributes,testing_data[i])
+            euclidean_dist.append((distance,temp_attributes[-1]))
+
+        euclidean_dist.sort(key=lambda i:i[0])
 
         num_yes = 0;
         num_no = 0;
 
         for i in range(k):
-            if euclieden_dist[i][1] == yes:
-                num_yes++
+            if euclidean_dist[i][1] == "yes":
+                num_yes += 1
             else:
-                num_no++
+                num_no +=1
         # if there is a tie
         if num_yes >= num_no:
             results.append("yes")
