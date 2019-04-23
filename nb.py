@@ -19,7 +19,7 @@ def class_separation(data_set):
     for data in data_set:
         data_map[str(data[-1])].append(data[0:-1])
     data_map_np = {}
-    print(data_map)
+    # print(data_map)
     data_map_np["no"] = array(data_map["no"]).astype(np.float)
     data_map_np["yes"] = array(data_map["yes"]).astype(np.float)
     return data_map_np
@@ -48,7 +48,7 @@ def density_function(x, avg, std):
     exp = math.exp(-(pow(float(x) - avg, 2))/(2 * pow(std, 2)))
     prob = (1/(std * math.sqrt(2 * math.pi))) * exp
     # print(x, mean, stdev)
-    print(prob)
+    # print(prob)
     return prob
 
 def cal_prediction(summary, new_data):
@@ -59,7 +59,7 @@ def cal_prediction(summary, new_data):
         probabilities["yes"] *= density_function(new_data[i], summary["yes"][i][0], summary["yes"][i][1])
     for i in range(len(summary["no"])):
         probabilities["no"] *= density_function(new_data[i], summary["no"][i][0], summary["no"][i][1])
-    print(probabilities)
+    # print(probabilities)
     if probabilities["yes"] >= probabilities["no"]:
         print("yes")
     else:
@@ -76,6 +76,6 @@ def nb(training_data_file, testing_data_file):
     # print(training_class_summary["no"])
     testing_data = read_data(testing_data_file)
     for input_data in testing_data:
-        print(input_data)
+        # print(input_data)
         cal_prediction(training_class_summary, input_data)
 
