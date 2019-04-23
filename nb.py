@@ -1,6 +1,8 @@
 import math
 import sys
 import csv
+from numpy import array
+import numpy as np
 
 def read_data(data_file):
     data_set = []
@@ -15,34 +17,39 @@ def class_separation(data_set):
     data_map["no"] = []
     data_map["yes"] = []
     for data in data_set:
-        data_map[str(data[-1])].append(data)
-    return data_map
+        data_map[str(data[-1])].append(data[0:-1])
+    data_map_np = {}
+    print(data_map)
+    data_map_np["no"] = array(data_map["no"]).astype(np.float)
+    data_map_np["yes"] = array(data_map["yes"]).astype(np.float)
+    return data_map_np
+
+def mean(numbers):
+    return np.sum(numbers) / float(len(numbers))
+
+def stdev(numbers):
+    avg = mean(numbers)
+    var = sum([pow(i - avg, 2) for i in numbers]) / float(len(numbers)-1)
+    std = math.sqrt(var)
+    return std
 
 def cal_summary(class_data):
     summary = []
     for i in range(len(class_data[0])):
-        if i  == len(class_data[0]) - 1:
-                break
-        mean = 0
-        stdev = 0
-        for data in class_data:
-            mean += float(data[i])
-        mean = mean / len(class_data)
-        for data in class_data:
-            stdev += pow(float(data[i]) - mean, 2)
-        if len(class_data) > 1:
-            stdev = stdev/(len(class_data) - 1)
-            stdev = math.sqrt(stdev)
-        else:
-            stdev = 0
-        summary.append((mean, stdev))
+        avg = mean(class_data[:, i])
+        std = stdev(class_data[:, i])
+        summary.append((avg, std))
     return summary
 
-def density_function(x, mean, stdev):
-    if stdev == 0:
-        return 1
-    exp = math.exp(-(pow(float(x) - mean, 2))/(2 * pow(stdev, 2)))
-    return (1/(stdev * math.sqrt(2 * math.pi))) * exp
+def density_function(x, avg, std):
+    if std == 0:
+        return 1.0
+
+    exp = math.exp(-(pow(float(x) - avg, 2))/(2 * pow(std, 2)))
+    prob = (1/(std * math.sqrt(2 * math.pi))) * exp
+    # print(x, mean, stdev)
+    print(prob)
+    return prob
 
 def cal_prediction(summary, new_data):
     probabilities = {}
@@ -52,6 +59,7 @@ def cal_prediction(summary, new_data):
         probabilities["yes"] *= density_function(new_data[i], summary["yes"][i][0], summary["yes"][i][1])
     for i in range(len(summary["no"])):
         probabilities["no"] *= density_function(new_data[i], summary["no"][i][0], summary["no"][i][1])
+    print(probabilities)
     if probabilities["yes"] >= probabilities["no"]:
         print("yes")
     else:
@@ -68,10 +76,6 @@ def nb(training_data_file, testing_data_file):
     # print(training_class_summary["no"])
     testing_data = read_data(testing_data_file)
     for input_data in testing_data:
+        print(input_data)
         cal_prediction(training_class_summary, input_data)
 
-if __name__ == "__main__":
-    if sys.argv[3] == "NB":
-        nb(sys.argv[1], sys.argv[2])
-    else: 
-        print("REEEEEEEEEEEEEEEEEEEEEEE")
