@@ -26,17 +26,15 @@ def main(argv):
     training_data = parse_file(training_file)
     testing_data = parse_file(testing_file)
 
-    results = []
     if algorithm == 'NB':
         # do naive bayes
         print("dat boi")
     else:
+        # do Knn
         k = int(algorithm.replace('NN', ''))
-
-        results = knn(k,training_data,testing_data)
-
-    for result in results:
-        print(result)
+        # for all testing instance run knn on each of them
+        for i in range(0, len(testing_data)):
+            print(knn(k, training_data, testing_data[i]))
 
 if __name__ == "__main__":
    main(sys.argv[1:])
