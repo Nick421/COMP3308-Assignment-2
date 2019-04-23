@@ -2,36 +2,32 @@ import math
 
 def knn(k, training_data, testing_data):
 
+    # get number of attributes
     num_attributes = len(training_data[0])-1
-    euclidean_dist = []
-    results = []
+    # array to stored neighbours
+    euclieden_dist = []
 
-    for i in range(len(testing_data)):
-        for x in range(len(training_data)):
-            temp_attributes = []
-            for y in range(0,num_attributes+1):
-                temp_attributes.append(training_data[x][y])
+    for x in range(len(training_data)):
+        # for all training attributes, find euclieden distance to testing data
+        distance = euclidean_distance(training_data[x],testing_data)
+        euclieden_dist.append((distance,training_data[x][-1]))
 
-            distance = euclidean_distance(temp_attributes,testing_data[i])
-            euclidean_dist.append((distance,temp_attributes[-1]))
+    # sort the distances
+    euclieden_dist.sort(key=lambda i:i[0])
 
-        euclidean_dist.sort(key=lambda i:i[0])
+    num_yes = 0;
+    num_no = 0;
 
-        num_yes = 0;
-        num_no = 0;
-
-        for i in range(k):
-            if euclidean_dist[i][1] == "yes":
-                num_yes += 1
-            else:
-                num_no +=1
-        # if there is a tie
-        if num_yes >= num_no:
-            results.append("yes")
+    for i in range(k):
+        if euclieden_dist[i][1] == "yes":
+            num_yes += 1
         else:
-            results.append("no")
-
-    return results
+            num_no +=1
+    # if there is a tie we take yes
+    if num_yes >= num_no:
+        return "yes"
+    else:
+        return "no"
 
 def euclidean_distance(old_attribute, new_attribute):
     distance = 0;
