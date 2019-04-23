@@ -2,6 +2,8 @@ import sys
 import csv
 import numpy
 
+from knn import knn, euclidean_distance
+
 def parse_file(filename):
     data = []
     with open(filename) as file:
@@ -24,8 +26,10 @@ def main(argv):
     training_data = parse_file(training_file)
     testing_data = parse_file(testing_file)
 
+    results = []
     if algorithm == 'NB':
         # do naive bayes
+        print("dat boi")
     else:
         k = int(algorithm.replace('NN', ''))
 
