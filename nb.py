@@ -4,78 +4,71 @@ import csv
 from numpy import array
 import numpy as np
 
-def read_data(data_file):
-    data_set = []
-    with open(data_file) as data:
-        data_read = csv.reader(data, delimiter = ",")
-        for row in data_read:
-            data_set.append(row)
-    return data_set
-
-def class_separation(data_set):
-    data_map = {}
-    data_map["no"] = []
-    data_map["yes"] = []
-    for data in data_set:
-        data_map[str(data[-1])].append(data[0:-1])
-    data_map_np = {}
-    # print(data_map)
-    data_map_np["no"] = array(data_map["no"]).astype(np.float)
-    data_map_np["yes"] = array(data_map["yes"]).astype(np.float)
-    return data_map_np
 
 def mean(numbers):
     return np.sum(numbers) / float(len(numbers))
 
 def stdev(numbers):
+    if len(numbers) < 2:
+        return 0
     avg = mean(numbers)
     var = sum([pow(i - avg, 2) for i in numbers]) / float(len(numbers)-1)
     std = math.sqrt(var)
     return std
 
-def cal_summary(class_data):
-    summary = []
-    for i in range(len(class_data[0])):
-        avg = mean(class_data[:, i])
-        std = stdev(class_data[:, i])
-        summary.append((avg, std))
-    return summary
+def class_divide(data_set):
+    class_divided = {}
+    class_divided["yes"] = []
+    class_divided["no"] = []
+    for row in data_set:
+        class_divided[row[-1]].append(row[0:-1])
+    class_divided["yes"] = array(class_divided["yes"])
+    class_divided["no"] = array(class_divided["no"])
+    # print(class_divided)
+    return class_divided
+
+def class_mean_std(class_divided):
+    class_mean_std_set = {}
+    class_mean_std_set["yes"] = []
+    class_mean_std_set["no"] = []
+    for i in range(len(class_divided["yes"][0])):
+        class_mean_std_set["yes"].append((mean(class_divided["yes"][:, i]),stdev(class_divided["yes"][:, i])))
+    for i in range(len(class_divided["no"][0])):
+        class_mean_std_set["no"].append((mean(class_divided["no"][:, i]),stdev(class_divided["no"][:, i])))
+    return class_mean_std_set
+
 
 def density_function(x, avg, std):
     if std == 0:
-        return 1.0
-
-    exp = math.exp(-(pow(float(x) - avg, 2))/(2 * pow(std, 2)))
+        # print(1)
+        return 1
+    exp = math.exp(-(pow(x - avg, 2))/(2 * pow(std, 2)))
     prob = (1/(std * math.sqrt(2 * math.pi))) * exp
-    # print(x, mean, stdev)
     # print(prob)
     return prob
 
-def cal_prediction(summary, new_data):
+def calculate_prob(summary_train_set, input_data, py, pn):
+    # print(summary_train_set)
     probabilities = {}
-    probabilities["yes"] = float(len(summary["yes"])/(len(summary["yes"]) + len(summary["no"])))
-    probabilities["no"] =  float(len(summary["no"])/(len(summary["yes"]) + len(summary["no"])))
-    for i in range(len(summary["yes"])):
-        probabilities["yes"] *= density_function(new_data[i], summary["yes"][i][0], summary["yes"][i][1])
-    for i in range(len(summary["no"])):
-        probabilities["no"] *= density_function(new_data[i], summary["no"][i][0], summary["no"][i][1])
+    
+    probabilities["yes"] = py
+    probabilities["no"] =  pn
+    for i in range(len(summary_train_set["yes"])):
+        probabilities["yes"] *= density_function(input_data[i], summary_train_set["yes"][i][0], summary_train_set["yes"][i][1])
+    for i in range(len(summary_train_set["no"])):
+        probabilities["no"] *= density_function(input_data[i], summary_train_set["no"][i][0], summary_train_set["no"][i][1])
     # print(probabilities)
     if probabilities["yes"] >= probabilities["no"]:
         print("yes")
-    else:
-        print("no")
+        return
+    print("no")
 
-def nb(training_data_file, testing_data_file):
-    training_data = read_data(training_data_file)
-    training_map = class_separation(training_data)
-    training_class_summary = {}
-    training_class_summary["yes"] = cal_summary(training_map["yes"])
-    training_class_summary["no"] = cal_summary(training_map["no"])
-
-    # print(training_class_summary["yes"])
-    # print(training_class_summary["no"])
-    testing_data = read_data(testing_data_file)
-    for input_data in testing_data:
-        # print(input_data)
-        cal_prediction(training_class_summary, input_data)
+def nb(train_set, test_set):
+    train_divided = class_divide(train_set)
+    py = len(train_divided["yes"]) / (len(train_divided["yes"]) + len(train_divided["no"]))
+    pn = len(train_divided["no"]) / (len(train_divided["yes"]) + len(train_divided["no"]))
+    summary_train_set = class_mean_std(train_divided)
+    # print(summary_train_set["yes"])
+    for row in test_set:
+        calculate_prob(summary_train_set, row, py, pn)
 

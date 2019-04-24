@@ -3,7 +3,7 @@ import csv
 import numpy
 
 from knn import knn, euclidean_distance
-from nb import nb, read_data, class_separation, cal_summary, density_function, cal_prediction
+from nb import nb
 
 def parse_file(filename):
     data = []
@@ -29,7 +29,7 @@ def main(argv):
 
     if algorithm == 'NB':
         # do naive bayes
-        nb(sys.argv[1], sys.argv[2])
+        nb(training_data, testing_data)
     else:
         # do Knn
         k = int(algorithm.replace('NN', ''))
